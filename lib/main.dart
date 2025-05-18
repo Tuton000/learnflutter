@@ -1,38 +1,31 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MaterialApp(title: 'Flutter Tutorial', home: FlutterTutorial()));
+  runApp(MaterialApp(title: 'Flutter Tutorial', home: Scaffold(
+    body: Center(child: MyButton()),
+  )));
 }
 
-class FlutterTutorial extends StatelessWidget {
-  const FlutterTutorial({super.key});
+class MyButton extends StatelessWidget {
+  const MyButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Scaffold is a layout for the major Material components
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: null,
-          tooltip: 'Navigation menu',
-          icon: Icon(Icons.menu),
+    return GestureDetector(
+      onTap: () {
+        print('MyButton was tapped');
+      },
+      child: Container(
+        height: 50.0,
+        padding: EdgeInsets.all(8),
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.lightGreen[500],
+          borderRadius: BorderRadius.circular(5.0),
         ),
-        title: Text('Example Title'),
-        actions: [
-          IconButton(
-            onPressed: null,
-            tooltip: 'Search',
-            icon: Icon(Icons.search),
-          ),
-        ],
-      ),
-      // body is the majority of the screen
-      body: const Center(child: Text('Hello world!')),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Add', // used by assistive technologies
-        onPressed: null,
-        child: Icon(Icons.add),
+        child: Center(child: Text('Engage')),
       ),
     );
   }
 }
+
