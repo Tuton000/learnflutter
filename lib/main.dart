@@ -2,77 +2,221 @@ import 'package:flutter/material.dart';
 
 void main() {
   runApp(MaterialApp(title: 'Flutter Tutorial', home: Scaffold(
-    body: Center(child: Counter()),
+    body: Center(child: ShoppingList(
+      products: [
+        Product(name: 'Egg'),
+        Product(name: 'Flour'),
+        Product(name: 'Chocolate chips'),
+      ],
+    )),
   )));
 }
 
-class Counter extends StatefulWidget {
-  const Counter({super.key});
+class ShoppingList extends StatefulWidget {
+  const ShoppingList({required this.products, super.key});
+
+  final List<Product> products;
 
   @override
-  State<Counter> createState() => _CounterState();
+  State<ShoppingList> createState() => _ShoppingListState();
 }
 
-class _CounterState extends State<Counter> {
+class _ShoppingListState extends State<ShoppingList> {
 
-  int _counter = 0;
+  final _shoppingCart = <Product>{};
 
-  void _increment() {
+  void _handleCartChanged(Product product, bool inCart) {
     setState(() {
-      /* This call to setState tell the flutter framework tha something has
-      changed in this state, which causes to rerun the build method below so
-      that the display reflect the updated values. If change _counter without
-      calling the setState then the build method won't called again and so
-      nothing would be appear to happen.
-      */
-      _counter++;
+      if (!inCart) {
+        _shoppingCart.add(product);
+      } else {
+        _shoppingCart.remove(product);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    /* This method is rerun every time the seState is called, for instance
-    as done by the increment method above. The flutter framework has been
-    optimize to rerunning the build method fast, so that you can just rebuild
-    anything that need to be updated rather than having individually changes
-    instances of widgets.
-    */
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Shopping List'),
+        centerTitle: true,
+      ),
+      body: ListView(
+        children: widget.products.map((product) {
+          return ShoppingListItem(
+            product: product,
+            inCart: _shoppingCart.contains(product),
+            onCartChanged: _handleCartChanged,
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+class ShoppingListItem extends StatelessWidget {
+  ShoppingListItem({
+    required this.product,
+    required this.inCart,
+    required this.onCartChanged,
+}) : super(key: ObjectKey(product));
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // ElevatedButton(onPressed: _increment, child: Text('Increment')),
-        CounterIncrementor(onPressed: _increment),
-        const SizedBox(width: 16),
-        CounterDisplay(count: _counter),
-        // Text('Count $_counter')
-      ],
+  final Product product;
+  final bool inCart;
+  final CartChangeCallback onCartChanged;
+
+  Color _getColor(BuildContext context) {
+    return inCart
+        ? Colors.black54
+        : Theme.of(context).primaryColor;
+  }
+
+  TextStyle? _getStyle(BuildContext context) {
+    if (!inCart) return null;
+
+    return TextStyle(
+      color: Colors.black54,
+      decoration: TextDecoration.lineThrough,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: () {
+        onCartChanged(product, inCart);
+      },
+      leading: CircleAvatar(
+        backgroundColor: _getColor(context),
+        child: Text(product.name[0]),
+      ),
+      title: Text(product.name,  style: _getStyle(context)),
     );
   }
 }
 
-class CounterDisplay extends StatelessWidget {
-  const CounterDisplay({required this.count, super.key});
 
-  final int count;
 
-  @override
-  Widget build(BuildContext context) {
-    return Text('Count: $count');
-  }
+typedef CartChangeCallback = Function(Product product, bool inCart);
+
+class Product {
+  Product({required this.name});
+
+  final String name;
 }
 
 
-class CounterIncrementor extends StatelessWidget {
-  const CounterIncrementor({required this.onPressed, super.key});
 
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(onPressed: onPressed, child: Text('Increment'));
-  }
-}
+// class ShoppingList extends StatefulWidget {
+//   const ShoppingList({required this.products, super.key});
+//
+//   final List<Product> products;
+//
+//   /* The framework calls createState first time a widget appear at a given
+//   location in the tree. If the parent rebuilds and uses a same type of widget
+//   with the same key, the framework re-uses the same Same state object instead
+//   of creating a new State object.
+//   */
+//
+//   @override
+//   State<ShoppingList> createState() => _ShoppingListState();
+// }
+//
+// class _ShoppingListState extends State<ShoppingList> {
+//
+//   final _shoppingCart = <Product>{};
+//
+//   void _handleCartChanged(Product product, bool inCart) {
+//     setState(() {
+//
+//       /* When a user changes whats in the cart, you need to change _shoppingCart
+//       inside a setState call to trigger a rebuild. The framework then calls
+//       build below which update the visual appearance of the app.
+//       */
+//
+//       if (!inCart) {
+//         _shoppingCart.add(product);
+//       } else {
+//         _shoppingCart.remove(product);
+//       }
+//     });
+//   }
+//
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Shopping List'),
+//       ),
+//       body: ListView(
+//         padding: const EdgeInsets.symmetric(vertical: 8),
+//         children: widget.products.map((product) {
+//           return ShoppingListItem(
+//               product: product,
+//               inCart: _shoppingCart.contains(product),
+//               onCartChange: _handleCartChanged);
+//         }).toList(),
+//       ),
+//
+//     );
+//   }
+// }
+//
+//
+// class ShoppingListItem extends StatelessWidget {
+//   ShoppingListItem({
+//     required this.product,
+//     required this.inCart,
+//     required this.onCartChange,
+// }) : super(key: ObjectKey(product));
+//
+//   final Product product;
+//   final bool inCart;
+//   final CartChangedCallback onCartChange;
+//
+//   Color _getColor(BuildContext context) {
+//     /* The theme depends on the BuildContext because different parts of the
+//     widget tree can have different themes. The BuildContext indicate where the
+//     build is taking place therefore which theme to use.
+//     */
+//     return inCart
+//         ? Colors.black54
+//         : Theme.of(context).primaryColor;
+//   }
+//
+//   TextStyle? _getTextStyle(BuildContext context) {
+//     if(!inCart) return null;
+//
+//     return const TextStyle(
+//       color: Colors.black54,
+//       decoration: TextDecoration.lineThrough,
+//     );
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListTile(
+//       onTap: () {
+//         onCartChange(product, inCart);
+//       },
+//       leading: CircleAvatar(
+//         backgroundColor: _getColor(context),
+//         child: Text(product.name[0]),
+//       ),
+//       title: Text(product.name, style: _getTextStyle(context)),
+//     );
+//   }
+// }
+//
+//
+// typedef CartChangedCallback = Function(Product product, bool inCart);
+//
+// class Product {
+//   const Product({required this.name});
+//
+//   final String name;
+// }
 
 
 
